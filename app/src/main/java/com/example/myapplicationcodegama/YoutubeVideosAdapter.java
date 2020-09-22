@@ -1,6 +1,7 @@
 package com.example.myapplicationcodegama;
 
 import android.app.Activity;
+import android.content.Context;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,9 +24,17 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class YoutubeVideosAdapter extends RecyclerView.Adapter<YoutubeVideosAdapter.MyVideosViewHolder> {
-    private List<VideoItem> videoItemsList = new ArrayList<>();
+    private List<VideoItem> videoItemsList;
     public static final int TYPE_NORMAL = 1;
     DisplayMetrics displayMetrics = new DisplayMetrics();
+    private ClickManager clickManager;
+    private Context context;
+
+    public YoutubeVideosAdapter(Context context, ClickManager clickManager) {
+        this.clickManager = clickManager;
+        this.context = context;
+        videoItemsList = new ArrayList<>();
+    }
 
     @NonNull
     @Override
@@ -41,6 +50,10 @@ public class YoutubeVideosAdapter extends RecyclerView.Adapter<YoutubeVideosAdap
     @Override
     public int getItemCount() {
         return videoItemsList.size();
+    }
+
+    public interface ClickManager {
+        void onItemClick(VideoItem videoItem, int pos);
     }
 
     @Override
@@ -72,6 +85,15 @@ public class YoutubeVideosAdapter extends RecyclerView.Adapter<YoutubeVideosAdap
         public MyVideosViewHolder(@NonNull View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    int pos = getAdapterPosition();
+                    if (clickManager != null) {
+                        clickManager.onItemClick(videoItemsList.get(pos), pos);
+                    }
+                }
+            });
         }
 
         public void setBindData(VideoItem videoItem) {
@@ -91,17 +113,17 @@ public class YoutubeVideosAdapter extends RecyclerView.Adapter<YoutubeVideosAdap
             playButton.setVisibility(View.VISIBLE);
             youTubePlayerView.setVisibility(View.GONE);
 
-            playButton.setOnClickListener(view -> {
-                imageViewItems.setVisibility(View.GONE);
-                youTubePlayerView.setVisibility(View.VISIBLE);
-                playButton.setVisibility(View.GONE);
-                youTubePlayerView.initialize(initializedYouTubePlayer -> initializedYouTubePlayer.addListener(new AbstractYouTubePlayerListener() {
-                    @Override
-                    public void onReady() {
-                        initializedYouTubePlayer.loadVideo(mYoutubeVideo.getVideoId(), 0);
-                    }
-                }), true);
-            });
+//            playButton.setOnClickListener(view -> {
+//                imageViewItems.setVisibility(View.GONE);
+//                youTubePlayerView.setVisibility(View.VISIBLE);
+//                playButton.setVisibility(View.GONE);
+//                youTubePlayerView.initialize(initializedYouTubePlayer -> initializedYouTubePlayer.addListener(new AbstractYouTubePlayerListener() {
+//                    @Override
+//                    public void onReady() {
+//                        initializedYouTubePlayer.loadVideo(mYoutubeVideo.getVideoId(), 0);
+//                    }
+//                }), true);
+//            });
         }
     }
 }
